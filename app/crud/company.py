@@ -40,6 +40,7 @@ def serialize_address(address: Createaddress) -> dict:
         "state": address.state,
         "zipcode": address.zipcode
     }
+
     
 def company_update(db:Session,companydetails:CompanyCreate,companyid:str):
     db_company = db.query(Company).filter(Company.companyid == companyid,Company.is_deleted == False).first()
