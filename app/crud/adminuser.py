@@ -110,5 +110,4 @@ def delete_admin_user(db:Session,user_id:int):
         db.refresh(user_db)
         return user_db
     else:
-        return None       
-
+        return None
