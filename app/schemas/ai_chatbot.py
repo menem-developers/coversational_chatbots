@@ -8,7 +8,7 @@ class Createwishlist(BaseModel):
    email:str
    phonenumber:str
    password:str
-   usertype:str
+   usertype:str 
    
         
 class CreatewishlistResponse(BaseModel):

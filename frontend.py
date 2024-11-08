@@ -3,7 +3,7 @@ import requests
 from datetime import datetime
 API_URL_MOTOR_CREATE = "http://127.0.0.1:8000/api/v1/chatbot/create_motor_insurance"
 API_URL_MOTOR_FILES = "http://127.0.0.1:8000/api/v1/chatbot/parse_user_vehicle_info"
-
+API_URL_MOTOR_SUPPORT = "http://127.0.0.1:8000/api/v1/chatbot/support"
 # Initialize session states
 if "chat_history" not in st.session_state:
     st.session_state["chat_history"] = []
@@ -42,7 +42,6 @@ def show_chat():
         st.button("Apply Insurance", on_click=select_service, args=("Apply Insurance",))
         st.button("Renewal", on_click=select_service, args=("Renewal",))
         st.button("Support", on_click=select_service, args=("Support",))
-        st.write(f"You selected Service: {st.session_state['selected_service']}") 
         if st.session_state["selected_service"] == "Apply Insurance":
             if st.session_state["selected_product"]: 
                 st.button("Motor", on_click=select_product, args=("Motor",))
@@ -227,7 +226,6 @@ def show_chat():
                             if st.button("Proceed to Payment"):
                                 st.session_state.policy_created = False
                                 st.success("Thank you for your payment!")
-                                    
 
 
             else:    
@@ -237,8 +235,31 @@ def show_chat():
                 st.button("Life", on_click=select_product, args=("Life",))
 
 
-        if st.session_state["selected_service"] == "Support":
-            st.write(f"You selected: {st.session_state['selected_service']}")
+        elif st.session_state["selected_service"] == "Support":
+            st.write(f"You selected: {st.session_state['selected_service']} - How can we help you?")
+            with st.form("Customer Entry"):
+                st.subheader("Customer Information")
+                user_questions = st.text_area("Enter your queries", max_chars=200)
+                submitted = st.form_submit_button("Enter")
+
+            if submitted:
+                try:
+                    response_motor = requests.get(f"{API_URL_MOTOR_SUPPORT}?query={user_questions}")
+                    if response_motor.status_code == 200:
+                        if response_motor.content:
+                            response_content = response_motor.content.decode("utf-8").replace("\\n", "\n")
+                            # Display content with markdown formatting
+                            st.markdown(response_content)
+                        else:
+                            st.error(f"Failed to create policy: {response_data.get('message')}")
+                    elif response_motor.status_code == 400:
+                        st.error("Failed to create policy: Invalid data")
+                    else:
+                        st.error(f"Error: {response_motor.status_code}")
+                except Exception as e:
+                    st.error(f"Failed to connect to server: {str(e)}")
+
+
         if st.session_state["selected_service"] == "Renewal":
             st.write(f"You selected: {st.session_state['selected_service']}")
             

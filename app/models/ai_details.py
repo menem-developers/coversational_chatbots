@@ -58,3 +58,13 @@ class CreateCustomer(Base):
     is_deleted = Column(Boolean, default=False)    
 
 
+class Test_db(Base):
+    __tablename__ = "test_db"
+
+    id = Column(Integer, primary_key=True, index=True)
+    docs_string = Column(String, nullable=False)
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    deleted_at = Column(DateTime, nullable=True)
+    is_deleted = Column(Boolean, default=False)    
+

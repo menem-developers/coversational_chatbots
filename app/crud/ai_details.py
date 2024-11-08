@@ -82,3 +82,15 @@ def chatbot_get_by_user_id(db:Session,user_id:int,admin_userid:int):
 def get_chatbot_by_chatbotid(db:Session,cahtbot_id:str):
     db_chatbot = db.query(Createchatbot).filter(Createchatbot.chatbotid == cahtbot_id,Createchatbot.is_deleted == False).first()
     return db_chatbot
+
+def support(db:Session):
+    db_chatbot = db.query(Test_db).filter(Test_db.id == 2,Test_db.is_deleted == False).first()
+    return db_chatbot
+
+
+def store(db:Session,text_list:str):
+    db_store = Test_db(docs_string=text_list)
+    db.add(db_store)
+    db.commit()
+    db.refresh(db_store)
+    return db_store

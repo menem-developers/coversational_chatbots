@@ -157,6 +157,26 @@ async def getchatbotbychatbotid(request: Request,cahtbot_id:str,db: Session = De
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
   
+@router.get("/support/")
+async def user_support(request: Request,query:str,db: Session = Depends(get_db)):
+    try:
+        chatbot = support(db=db)
+        response = model.generate_content([
+            f"""
+            You are an AI assistant specializing in cinema and music. Here is the content extracted from the provided webpage:
+            
+            "{chatbot.docs_string}"
+
+            The user’s query is:
+            '{query}'
+
+            Based on the content from the webpage, answer the user’s query as accurately as possible.
+            """
+        ], safety_settings=safety_settings, generation_config=generation_config)
+        response_text = response.text.strip()
+        return response_text
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")  
 
 @router.get("/general_ai/")
 async def generalai(request: Request,generalaidetails:Creategeneralai,db: Session = Depends(get_db),token: str = Depends(oauth2_scheme)):
@@ -283,6 +303,31 @@ def extract_text_from_image(image) -> list:
     text = pytesseract.image_to_string(image)
     text_list = text.splitlines()
     return text_list
+
+@router.post("/test_docs/")
+async def parse_user_vehicle_info(file: UploadFile = File(...),db: Session = Depends(get_db)):
+    if file.filename.endswith('.pdf'):
+        pdf_bytes = await file.read()
+        pil_images = pdf_to_pil(pdf_bytes)
+        image = pil_images
+    else:
+        image = Image.open(file.file)
+
+    text_list = extract_text_from_image(image)
+    motor = store(db=db,text_list=text_list)
+    if motor is None:
+        data={
+            "status":False,
+            "data":{},
+            "message":"Failed"
+        }   
+        return data    
+    data={
+            "status":True,
+            "data":motor,
+            "message":"Success"
+        }   
+    return data
 
 @router.post("/parse_user_vehicle_info/")
 async def parse_user_vehicle_info(file: UploadFile = File(...)):
